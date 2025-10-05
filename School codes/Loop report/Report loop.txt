@@ -1,0 +1,29 @@
+from odoo import models, fields
+from collections import defaultdict
+
+class SchoolTimetable(models.Model):
+    _name = 'school.report.wizard'
+    _description = 'School Timetable'
+
+    class_id = fields.Many2one('school.class', string='Class')
+    semester = fields.Selection([('1', 'S1'),
+                                 ('2', 'S2')],
+                                string='Semester', required=True)
+
+    def action_print_timetable(self):
+        domain = []
+        semester = self.semester
+        if semester:
+            domain += [('semester', '=', semester)]
+        timetables = self.env['school.timetable'].search_read(domain)
+
+        # Group timetables by class_id
+        class_timetables = defaultdict(list)
+        for timetable in timetables:
+            class_timetables[timetable['class_id'][0]].append(timetable)
+
+        data = {
+            'form_data': self.read()[0],
+            'class_timetables': dict(class_timetables)
+        }
+        return self.env.ref('Orari.action_report_timetable').report_action(self, data=data)

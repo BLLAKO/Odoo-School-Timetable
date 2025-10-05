@@ -1,0 +1,26 @@
+from odoo import models, fields
+
+
+class SchoolTimetable(models.Model):
+    _name = 'school.report.wizard'
+    _description = 'School Timetable'
+
+    class_id = fields.Many2one('school.class', string='Class')
+    semester = fields.Selection([('1', 'S1'),
+                                 ('2', 'S2')],
+                                string='Semester', required=True)
+
+    def action_print_timetable(self):
+        domain = []
+        class_id = self.class_id
+        if class_id:
+            domain += [('class_id', '=', class_id.id)]
+        semester = self.semester
+        if semester:
+            domain += [('semester', '=', semester)]
+        timetables = self.env['school.timetable'].search_read(domain)
+        data = {
+            'form_data': self.read()[0],
+            'timetables': timetables
+        }
+        return self.env.ref('Orari.action_report_timetable').report_action(self, data=data)

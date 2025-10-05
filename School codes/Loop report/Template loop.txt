@@ -1,0 +1,72 @@
+<odoo>
+    <template id="report_timetable_details">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <div class="oe_structure"/>
+                    <div class="text-center">
+                        <h2>Timetable Details</h2>
+                    </div>
+                    <table>
+                        <tr>
+                            <td>Semester</td>
+                            <td>:</td>
+                            <td>
+                                <t t-if="form_data.get('semester')">
+                                    <t t-esc="form_data['semester']"/>
+                                </t>
+                            </td>
+                        </tr>
+                    </table>
+                    <br/>
+                    <!-- Loop over class_timetables -->
+                    <t t-foreach="class_timetables" t-as="class_id">
+                        <!-- Retrieve class name -->
+                        <t t-set="class_name" t-value="class_timetables[class_id][0]['class_id'][1]"/>
+                        <!-- Display class name -->
+                        <h3><t t-esc="class_name"/></h3>
+                        <table class="table table-bordered mt32">
+                            <thead>
+                                <tr>
+                                    <th name="th_day" class="text-left">
+                                        <span>Day</span>
+                                    </th>
+                                    <t t-foreach="sorted(set(t['start_hour'] for t in class_timetables[class_id]))"
+                                       t-as="start_hour">
+                                        <th name="th_hour" class="text-left">
+                                            <span t-esc="start_hour"/>
+                                            -
+                                            <span t-esc="start_hour + 1"/>
+                                        </th>
+                                    </t>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']" t-as="day">
+                                    <tr>
+                                        <td>
+                                            <span t-esc="day"/>
+                                        </td>
+                                        <t t-foreach="sorted(set(t['start_hour'] for t in class_timetables[class_id]))"
+                                           t-as="start_hour">
+                                            <td>
+                                                <t t-foreach="class_timetables[class_id]" t-as="timetable">
+                                                    <t t-if="timetable['day'] == day and timetable['start_hour'] == start_hour">
+                                                        <span>Subject:
+                                                            <t t-esc="timetable['subject_id'][1]"/>
+                                                        </span>
+                                                    </t>
+                                                </t>
+                                            </td>
+                                        </t>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                        <br/>
+                    </t>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>
